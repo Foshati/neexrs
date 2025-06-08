@@ -1,5 +1,6 @@
 use neexrs::{cli::Cli, runner::Runner, types::RunOptions};
 use clap::Parser;
+use std::sync::Arc;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -57,7 +58,7 @@ async fn main() -> anyhow::Result<()> {
             }
         }
         
-        neexrs::cli::Commands::Servers { commands, port, restart, env_file } => {
+        neexrs::cli::Commands::Servers { commands, port: _port, restart: _restart, env_file: _env_file } => {
             let options = RunOptions {
                 parallel: true,
                 max_parallel: None,
@@ -78,11 +79,15 @@ async fn main() -> anyhow::Result<()> {
             println!("Press Ctrl+C to stop all servers");
             
             // Setup signal handler
-            let runner_clone = runner.clone_for_signal();
+            let runner_clone = Arc::clone(&runner.get_active_processes());
             tokio::spawn(async move {
                 tokio::signal::ctrl_c().await.expect("Failed to listen for ctrl-c");
                 println!("\n🛑 Stopping all servers...");
-                let _ = runner_clone.kill_all().await;
+                // Kill all active processes
+                let mut processes = runner_clone.lock().await;
+                for (_, mut child) in processes.drain() {
+                    let _ = child.kill().await;
+                }
                 std::process::exit(0);
             });
             
@@ -96,15 +101,4 @@ async fn main() -> anyhow::Result<()> {
     }
 
     Ok(())
-}
-
-// Extension trait for Runner to add signal handling
-impl Runner {
-    pub fn clone_for_signal(&self) -> Self {
-        Self {
-            options: self.options.clone(),
-            active_processes: std::sync::Arc::clone(&self.active_processes),
-            logger: std::sync::Arc::clone(&self.logger),
-        }
-    }
 }

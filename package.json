@@ -1,0 +1,43 @@
+{
+  "name": "neexrs",
+  "version": "0.1.0",
+  "description": "🚀 The Modern Build System for Polyrepo-in-Monorepo Architecture",
+  "main": "bin/neex",
+  "bin": {
+    "neex": "./bin/neex"
+  },
+  "scripts": {
+    "build": "cargo build --release",
+    "install": "cargo build --release && cp target/release/neex bin/neex",
+    "prepack": "npm run build && npm run install"
+  },
+  "keywords": [
+    "build-system",
+    "task-runner",
+    "parallel",
+    "npm-run-all",
+    "command-runner",
+    "rust",
+    "cli"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/neexrs.git"
+  },
+  "homepage": "https://github.com/yourusername/neexrs",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "files": [
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ]
+}

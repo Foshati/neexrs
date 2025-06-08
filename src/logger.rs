@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::time::Duration;
 use crossterm::style::Color;
 use indicatif::{ProgressBar, ProgressStyle};
+use colored::Colorize;
 
 pub struct Logger {
     colors: HashMap<String, Color>,
@@ -57,11 +58,11 @@ impl Logger {
     }
 
     pub fn print_command_output(&self, command: &str, output: &str, is_error: bool) {
-        let color = self.colors.get(command).unwrap_or(&Color::White);
-        let prefix = format!("[{}]", command);
+        let _color = self.colors.get(command).unwrap_or(&Color::White);
+        let prefix = format!("[{}]", command).cyan();
         
         if is_error {
-            eprintln!("{} {}", prefix, output);
+            eprintln!("{} {}", prefix, output.red());
         } else {
             println!("{} {}", prefix, output);
         }
@@ -72,7 +73,7 @@ impl Logger {
         println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         
         for result in results {
-            let status = if result.success { "✓" } else { "✗" };
+            let status = if result.success { "✓".green() } else { "✗".red() };
             let duration = result.duration
                 .map(|d| format!("{}ms", d.as_millis()))
                 .unwrap_or_else(|| "N/A".to_string());

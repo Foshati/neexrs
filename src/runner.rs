@@ -9,9 +9,9 @@ use crate::types::{RunOptions, RunResult, CommandOutput, OutputType};
 use crate::logger::Logger;
 
 pub struct Runner {
-    options: RunOptions,
-    active_processes: Arc<Mutex<HashMap<String, tokio::process::Child>>>,
-    logger: Arc<Mutex<Logger>>,
+    pub(crate) options: RunOptions,
+    pub(crate) active_processes: Arc<Mutex<HashMap<String, tokio::process::Child>>>,
+    pub(crate) logger: Arc<Mutex<Logger>>,
 }
 
 impl Runner {
@@ -21,6 +21,10 @@ impl Runner {
             active_processes: Arc::new(Mutex::new(HashMap::new())),
             logger: Arc::new(Mutex::new(Logger::new())),
         }
+    }
+
+    pub fn get_active_processes(&self) -> &Arc<Mutex<HashMap<String, tokio::process::Child>>> {
+        &self.active_processes
     }
 
     pub async fn run(&self, commands: Vec<String>) -> anyhow::Result<Vec<RunResult>> {
@@ -93,7 +97,19 @@ impl Runner {
         cmd.stdout(std::process::Stdio::piped())
            .stderr(std::process::Stdio::piped());
 
-        let mut child = cmd.spawn()?;
+        let child = cmd.spawn()?;
+        
+        // Store the child process
+        {
+            let mut processes = self.active_processes.lock().await;
+            processes.insert(command.clone(), child);
+        }
+        
+        // Retrieve the child process for execution
+        let mut child = {
+            let mut processes = self.active_processes.lock().await;
+            processes.remove(&command).unwrap()
+        };
         
         let mut outputs = Vec::new();
         
