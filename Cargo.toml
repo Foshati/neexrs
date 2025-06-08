@@ -1,0 +1,17 @@
+[package]
+name = "neexrs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.4", features = ["derive"] }
+tokio = { version = "1.35", features = ["full"] }
+colored = "2.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+futures = "0.3"
+crossterm = "0.28"
+indicatif = "0.17"
+regex = "1.10"
+uuid = { version = "1.6", features = ["v4"] }
