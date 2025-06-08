@@ -1,7 +1,18 @@
 [package]
 name = "neexrs"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "🚀 The Modern Build System for Polyrepo-in-Monorepo Architecture"
+license = "MIT"
+repository = "https://github.com/yourusername/neexrs"
+homepage = "https://github.com/yourusername/neexrs"
+keywords = ["build-system", "task-runner", "parallel", "npm-run-all", "command-runner"]
+categories = ["command-line-utilities", "development-tools"]
+
+[[bin]]
+name = "neex"
+path = "src/main.rs"
 
 [dependencies]
 clap = { version = "4.4", features = ["derive"] }
@@ -15,3 +26,9 @@ crossterm = "0.28"
 indicatif = "0.17"
 regex = "1.10"
 uuid = { version = "1.6", features = ["v4"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

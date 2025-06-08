@@ -1,5 +1,6 @@
-use colored::*;
-use crossterm::style::{Color, SetForegroundColor};
+use std::collections::HashMap;
+use std::time::Duration;
+use crossterm::style::Color;
 use indicatif::{ProgressBar, ProgressStyle};
 
 pub struct Logger {
@@ -41,5 +42,42 @@ impl Logger {
         pb.enable_steady_tick(Duration::from_millis(80));
         
         self.spinners.insert(command.to_string(), pb);
+    }
+
+    pub fn stop_spinner(&mut self, command: &str, success: bool) {
+        if let Some(pb) = self.spinners.remove(command) {
+            let status = if success { "✓ Completed" } else { "✗ Failed" };
+            pb.finish_with_message(format!("{}: {}", command, status));
+        }
+    }
+
+    pub fn print_banner(&self) {
+        println!("\n🚀 neex - Modern Build System");
+        println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    }
+
+    pub fn print_command_output(&self, command: &str, output: &str, is_error: bool) {
+        let color = self.colors.get(command).unwrap_or(&Color::White);
+        let prefix = format!("[{}]", command);
+        
+        if is_error {
+            eprintln!("{} {}", prefix, output);
+        } else {
+            println!("{} {}", prefix, output);
+        }
+    }
+
+    pub fn print_summary(&self, results: &[crate::types::RunResult]) {
+        println!("\n📊 Execution Summary");
+        println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        
+        for result in results {
+            let status = if result.success { "✓" } else { "✗" };
+            let duration = result.duration
+                .map(|d| format!("{}ms", d.as_millis()))
+                .unwrap_or_else(|| "N/A".to_string());
+            
+            println!("{} {} ({})", status, result.command, duration);
+        }
     }
 }
